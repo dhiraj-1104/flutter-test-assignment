@@ -23,7 +23,9 @@ Future<void> init() async {
   final userbox = await Hive.openBox('users_box');
   sl.registerLazySingleton(() => userbox);
 
-  sl.registerLazySingleton<RemoteDatasource>(() => MockApi());
+  sl.registerLazySingleton<RemoteDatasource>(
+    () => ReqResApiDatasourceImpl(apiClient: sl()),
+  );
 
   sl.registerLazySingleton<NetworkConnectivity>(
     () => NetworkConnectivityImpl(connectivity: sl()),

@@ -92,7 +92,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
           return name.firstName.toLowerCase().contains(
             event.query.toLowerCase(),
           );
-          // return name.firstName.contains(event.query);
         }).toList();
         emit(
           UserLoaded(
