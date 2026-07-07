@@ -8,7 +8,6 @@ import 'package:http/http.dart' as http;
 
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-
 import 'remote_datasource_test.mocks.dart';
 
 @GenerateMocks([ApiClient])
@@ -23,7 +22,6 @@ void main() {
 
   group('getConcreteNumberTrivia', () {
     test('should return list of users when status code is 200', () async {
-      // arrange
       final response = http.Response(
         jsonEncode({
           "data": [
@@ -41,10 +39,8 @@ void main() {
 
       when(mockHttp.get(any)).thenAnswer((_) async => response);
 
-      // act
       final result = await reqResApi.fetchUser(1);
 
-      // assert
       expect(result.length, 1);
       expect(result.first.userId, 1);
       expect(result.first.firstName, "John");

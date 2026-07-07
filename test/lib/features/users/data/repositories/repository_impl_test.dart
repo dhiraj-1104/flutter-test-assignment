@@ -45,17 +45,14 @@ void main() {
     test(
       'should return cached users when device is offline and cache exists',
       () async {
-        // Arrange
         when(mockConnectivity.isConnected).thenAnswer((_) async => false);
 
         when(
           mockLocalDatasource.getCachedUsers(),
         ).thenAnswer((_) async => users);
 
-        // Act
         final result = await repository.getUser(1);
 
-        // Assert
         expect(result.length, 1);
         expect(result.first.userId, users.first.userId);
         verify(mockConnectivity.isConnected);
@@ -68,18 +65,15 @@ void main() {
   test(
     'should throw UnableToFetchUser when device is offline and cache is empty',
     () async {
-      // Arrange
       when(mockConnectivity.isConnected).thenAnswer((_) async => false);
 
       when(mockLocalDatasource.getCachedUsers()).thenAnswer((_) async => []);
 
-      // Act + Assert
       await expectLater(
         repository.getUser(1),
         throwsA(isA<UnableToFetchUser>()),
       );
 
-      // Verify
       verify(mockConnectivity.isConnected).called(1);
       verify(mockLocalDatasource.getCachedUsers()).called(1);
 
@@ -90,15 +84,12 @@ void main() {
   test(
     'should fetch users from remote datasource and cache them when online',
     () async {
-      // Arrange
       when(mockConnectivity.isConnected).thenAnswer((_) async => true);
       when(mockRemoteDatasource.fetchUser(1)).thenAnswer((_) async => users);
       when(mockLocalDatasource.cacheUsers(any, any)).thenAnswer((_) async {});
 
-      // Act
       final result = await repository.getUser(1);
 
-      // Assert
       expect(result.length, users.length);
       expect(result.first.userId, users.first.userId);
       verify(mockConnectivity.isConnected).called(1);
@@ -110,14 +101,12 @@ void main() {
   test(
     'should fetch users from remote datasource and cache them when online',
     () async {
-      // Arrange
       when(mockConnectivity.isConnected).thenAnswer((_) async => true);
       when(mockRemoteDatasource.fetchUser(1)).thenAnswer((_) async => users);
       when(mockLocalDatasource.cacheUsers(any, any)).thenAnswer((_) async {});
 
-      // Act
       final result = await repository.getUser(1);
-      // Assert
+
       expect(result.length, users.length);
       expect(result.first.userId, users.first.userId);
       verify(mockConnectivity.isConnected).called(1);
@@ -148,8 +137,6 @@ void main() {
       ),
     ];
 
-    // Arrange
-
     when(mockConnectivity.isConnected).thenAnswer((_) async => true);
 
     when(
@@ -162,11 +149,7 @@ void main() {
 
     when(mockLocalDatasource.cacheUsers(any, any)).thenAnswer((_) async {});
 
-    // Act
-
     final result = await repository.getUser(2);
-
-    // Assert
 
     expect(result.length, 2);
 
@@ -186,8 +169,6 @@ void main() {
   test(
     'should return cached users when remote datasource throws exception',
     () async {
-      // Arrange
-
       when(mockConnectivity.isConnected).thenAnswer((_) async => true);
 
       when(
@@ -196,11 +177,7 @@ void main() {
 
       when(mockLocalDatasource.getCachedUsers()).thenAnswer((_) async => users);
 
-      // Act
-
       final result = await repository.getUser(1);
-
-      // Assert
 
       expect(result.length, users.length);
 
@@ -219,8 +196,6 @@ void main() {
   test(
     'should rethrow exception when remote fails and cache is empty',
     () async {
-      // Arrange
-
       final exception = Exception('Server Error');
 
       when(mockConnectivity.isConnected).thenAnswer((_) async => true);
@@ -229,11 +204,7 @@ void main() {
 
       when(mockLocalDatasource.getCachedUsers()).thenAnswer((_) async => []);
 
-      // Act + Assert
-
       await expectLater(repository.getUser(1), throwsA(same(exception)));
-
-      // Verify
 
       verify(mockConnectivity.isConnected).called(1);
 

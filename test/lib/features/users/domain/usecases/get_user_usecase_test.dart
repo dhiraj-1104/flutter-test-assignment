@@ -29,15 +29,9 @@ void main() {
 
   group('GetUserUsecase', () {
     test('should return users from repository', () async {
-      // Arrange
-
       when(mockUserRepository.getUser(1)).thenAnswer((_) async => users);
 
-      // Act
-
       final result = await usecase(1);
-
-      // Assert
 
       expect(result, users);
 
@@ -47,13 +41,9 @@ void main() {
     });
 
     test('should rethrow exception when repository throws', () async {
-      // Arrange
-
       final exception = Exception('Repository Error');
 
       when(mockUserRepository.getUser(1)).thenThrow(exception);
-
-      // Act + Assert
 
       await expectLater(usecase(1), throwsA(same(exception)));
 

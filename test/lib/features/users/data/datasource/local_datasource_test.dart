@@ -70,20 +70,16 @@ void main() {
     final jsonUsers = users.map((e) => e.toJson()).toList();
 
     test('should return empty list when cache time is null', () async {
-      // Arrange
       when(mockBox.get(HiveDatasoureImpl.cacheTimeKey)).thenReturn(null);
 
-      // Act
       final result = await datasource.getCachedUsers();
 
-      // Assert
       expect(result, isEmpty);
     });
 
     test(
       'should delete cache and return empty list if cache expired',
       () async {
-        // Arrange
         final expiredDate = DateTime.now().subtract(const Duration(hours: 3));
         when(mockBox.get(HiveDatasoureImpl.usersKey)).thenReturn("");
         when(
@@ -92,10 +88,8 @@ void main() {
 
         when(mockBox.delete(any)).thenAnswer((_) async {});
 
-        // Act
         final result = await datasource.getCachedUsers();
 
-        // Assert
         expect(result, isEmpty);
 
         verify(mockBox.delete(HiveDatasoureImpl.cacheTimeKey)).called(1);
@@ -104,40 +98,32 @@ void main() {
     );
 
     test('should return empty list when cached users are null', () async {
-      // Arrange
       when(
         mockBox.get(HiveDatasoureImpl.cacheTimeKey),
       ).thenReturn(DateTime.now().toString());
 
       when(mockBox.get(HiveDatasoureImpl.usersKey)).thenReturn(null);
 
-      // Act
       final result = await datasource.getCachedUsers();
 
-      // Assert
       expect(result, isEmpty);
     });
 
     test('should return cached users when cache is valid', () async {
-      // Arrange
       when(mockBox.get(HiveDatasoureImpl.usersKey)).thenReturn(jsonUsers);
       when(
         mockBox.get(HiveDatasoureImpl.cacheTimeKey),
       ).thenReturn(DateTime.now().toString());
 
-      // Act
       final result = await datasource.getCachedUsers();
 
-      // Assert
       expect(result.length, users.length);
       expect(result.first.email, equals(users.first.email));
     });
 
     test('should throws exception if the hive error occurs', () async {
-      // Arrange
       when(mockBox.get(any)).thenThrow(Exception('Hive Error'));
 
-      // Act + Assert
       expect(() => datasource.getCachedUsers(), throwsException);
     });
   });
