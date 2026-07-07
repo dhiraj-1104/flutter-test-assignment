@@ -15,7 +15,6 @@ void main() {
   late MockRemoteDatasource mockRemoteDatasource;
   late MockLocalDatasource mockLocalDatasource;
   late MockNetworkConnectivity mockConnectivity;
-
   late RespositoriesImpl repository;
 
   setUp(() {
@@ -47,7 +46,6 @@ void main() {
       'should return cached users when device is offline and cache exists',
       () async {
         // Arrange
-
         when(mockConnectivity.isConnected).thenAnswer((_) async => false);
 
         when(
@@ -55,19 +53,13 @@ void main() {
         ).thenAnswer((_) async => users);
 
         // Act
-
         final result = await repository.getUser(1);
 
         // Assert
-
         expect(result.length, 1);
-
         expect(result.first.userId, users.first.userId);
-
         verify(mockConnectivity.isConnected);
-
         verify(mockLocalDatasource.getCachedUsers());
-
         verifyNever(mockRemoteDatasource.fetchUser(any));
       },
     );
@@ -99,29 +91,19 @@ void main() {
     'should fetch users from remote datasource and cache them when online',
     () async {
       // Arrange
-
       when(mockConnectivity.isConnected).thenAnswer((_) async => true);
-
       when(mockRemoteDatasource.fetchUser(1)).thenAnswer((_) async => users);
-
       when(mockLocalDatasource.cacheUsers(any, any)).thenAnswer((_) async {});
 
       // Act
-
       final result = await repository.getUser(1);
 
       // Assert
-
       expect(result.length, users.length);
-
       expect(result.first.userId, users.first.userId);
-
       verify(mockConnectivity.isConnected).called(1);
-
       verify(mockRemoteDatasource.fetchUser(1)).called(1);
-
       verify(mockLocalDatasource.cacheUsers(users, any)).called(1);
-
       verifyNever(mockLocalDatasource.getCachedUsers());
     },
   );
@@ -129,29 +111,18 @@ void main() {
     'should fetch users from remote datasource and cache them when online',
     () async {
       // Arrange
-
       when(mockConnectivity.isConnected).thenAnswer((_) async => true);
-
       when(mockRemoteDatasource.fetchUser(1)).thenAnswer((_) async => users);
-
       when(mockLocalDatasource.cacheUsers(any, any)).thenAnswer((_) async {});
 
       // Act
-
       final result = await repository.getUser(1);
-
       // Assert
-
       expect(result.length, users.length);
-
       expect(result.first.userId, users.first.userId);
-
       verify(mockConnectivity.isConnected).called(1);
-
       verify(mockRemoteDatasource.fetchUser(1)).called(1);
-
       verify(mockLocalDatasource.cacheUsers(users, any)).called(1);
-
       verifyNever(mockLocalDatasource.getCachedUsers());
     },
   );

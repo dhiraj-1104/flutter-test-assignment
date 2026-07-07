@@ -31,13 +31,10 @@ void main() {
     final date = DateTime.now();
 
     test('should cache users and cache time', () async {
-      // Arrange
       when(mockBox.put(any, any)).thenAnswer((_) async {});
 
-      // Act
       await datasource.cacheUsers(users, date);
 
-      // Assert
       verify(
         mockBox.put(
           HiveDatasoureImpl.usersKey,
@@ -53,10 +50,8 @@ void main() {
     });
 
     test('should rethrow exception when put fails', () async {
-      // Arrange
       when(mockBox.put(any, any)).thenThrow(Exception('Hive Error'));
 
-      // Act + Assert
       expect(() => datasource.cacheUsers(users, date), throwsException);
     });
   });
@@ -138,7 +133,7 @@ void main() {
       expect(result.first.email, equals(users.first.email));
     });
 
-    test('should rethrow exception when get throws', () async {
+    test('should throws exception if the hive error occurs', () async {
       // Arrange
       when(mockBox.get(any)).thenThrow(Exception('Hive Error'));
 
