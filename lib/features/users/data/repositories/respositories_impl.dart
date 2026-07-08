@@ -50,7 +50,7 @@ class RespositoriesImpl extends UserRepository {
               DateTime.now(),
             );
             AppLogger.info("Successfully Cached the user Data");
-            return updatedCachedUsers.map((e) => User.fromModel(e)).toList();
+            return users.map((e) => User.fromModel(e)).toList();
           } else {
             await _localDatasource.cacheUsers(users, DateTime.now());
 

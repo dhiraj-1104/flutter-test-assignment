@@ -4,6 +4,7 @@ import 'package:flutter_assignment/features/users/domain/entities/user.dart';
 import 'package:flutter_assignment/features/users/domain/usecases/get_user_usecase.dart';
 import 'package:flutter_assignment/features/users/presentation/bloc/event.dart';
 import 'package:flutter_assignment/features/users/presentation/bloc/state.dart';
+import 'package:flutter_assignment/features/users/presentation/form_inputs/search_input.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
@@ -39,6 +40,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     });
 
     on<LoadUserEvent>((event, emit) async {
+      AppLogger.debug("LoadUserEvent received");
       if (state is! UserLoaded) {
         AppLogger.debug("The state is not UserLoaded so returning");
         return;
@@ -46,7 +48,12 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
       final currentState = state as UserLoaded;
 
-      if (currentState.hasReachedMax) return;
+      AppLogger.debug("hasReachedMax=${currentState.hasReachedMax}");
+
+      if (currentState.hasReachedMax) {
+        AppLogger.debug("No more pages available");
+        return;
+      }
 
       emit(
         UserLoaded(users: usersList, isFetching: true, hasReachedMax: false),
@@ -86,13 +93,20 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     }, transformer: droppable());
 
     on<FilterUserEvent>((event, emit) {
+      final search = SearchInput.dirty(event.query);
       try {
+        if (!search.isValid) {
+          return;
+        }
         emit(UserLoading());
         final filteredUsers = usersList.where((name) {
           return name.firstName.toLowerCase().contains(
             event.query.toLowerCase(),
           );
         }).toList();
+        AppLogger.debug(
+          "Filtering the users. Filtered User: ${filteredUsers.toString()}",
+        );
         emit(
           UserLoaded(
             users: filteredUsers,

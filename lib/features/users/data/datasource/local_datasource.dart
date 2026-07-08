@@ -38,7 +38,7 @@ class HiveDatasoureImpl extends LocalDatasource {
                 UserModel.fromJson(Map<String, dynamic>.from(user as Map)),
           )
           .toList();
-      AppLogger.debug("The users model is: $users");
+
       return users;
     } catch (e, stackTrace) {
       AppLogger.error(

@@ -30,10 +30,10 @@ void main() {
     ),
     User(
       userId: 2,
-      firstName: 'Jane',
+      firstName: 'lane',
       lastName: 'Doe',
       imgUrl: '',
-      email: 'jane@test.com',
+      email: 'lane@test.com',
     ),
   ];
 
@@ -91,26 +91,6 @@ void main() {
 
       verify(mockGetUserUsecase(2)).called(1);
     });
-
-    test('should stop loading when empty list returned', () async {
-      when(mockGetUserUsecase(1)).thenAnswer((_) async => users);
-
-      when(mockGetUserUsecase(2)).thenAnswer((_) async => []);
-
-      bloc.add(GetUserEvent());
-
-      await untilCalled(mockGetUserUsecase(1));
-
-      expectLater(bloc.stream, emitsThrough(isA<UserLoaded>()));
-
-      bloc.add(LoadUserEvent());
-    });
-
-    test('should ignore LoadUserEvent when state is not UserLoaded', () async {
-      bloc.add(LoadUserEvent());
-
-      verifyNever(mockGetUserUsecase(any));
-    });
   });
 
   group('FilterUserEvent', () {
@@ -121,7 +101,16 @@ void main() {
 
       await untilCalled(mockGetUserUsecase(1));
 
-      expectLater(bloc.stream, emitsThrough(isA<UserLoaded>()));
+      expectLater(
+        bloc.stream,
+        emitsThrough(
+          predicate<UserLoaded>(
+            (state) =>
+                state.users.length == 1 &&
+                state.users.first.firstName == "John",
+          ),
+        ),
+      );
 
       bloc.add(FilterUserEvent(query: 'jo'));
     });

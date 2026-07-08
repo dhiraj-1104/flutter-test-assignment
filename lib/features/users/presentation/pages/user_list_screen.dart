@@ -1,10 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_assignment/features/users/domain/entities/user.dart';
 import 'package:flutter_assignment/features/users/presentation/bloc/bloc.dart';
 import 'package:flutter_assignment/features/users/presentation/bloc/event.dart';
 import 'package:flutter_assignment/features/users/presentation/bloc/state.dart';
 import 'package:flutter_assignment/features/users/presentation/pages/user_details_screen.dart';
+import 'package:flutter_assignment/features/users/presentation/widgets/loading_indicator.dart';
+import 'package:flutter_assignment/features/users/presentation/widgets/search_bar.dart';
+import 'package:flutter_assignment/features/users/presentation/widgets/user_list_tile.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UserListScreen extends StatefulWidget {
@@ -17,7 +19,6 @@ class UserListScreen extends StatefulWidget {
 class _UserListScreenState extends State<UserListScreen> {
   final ScrollController _controller = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   User? selectedUser;
   @override
   void initState() {
@@ -70,8 +71,35 @@ class _UserListScreenState extends State<UserListScreen> {
                       },
                       child: Column(
                         children: [
-                          searchBar(context),
-                          userListViewBuilder(state),
+                          CustomSearchBar(searchController: _searchController),
+                          Expanded(
+                            child: state.users.isEmpty
+                                ? Center(child: Text("No User Found!!"))
+                                : ListView.builder(
+                                    controller: _controller,
+                                    itemCount:
+                                        state.users.length +
+                                        (state.isFetching ? 1 : 0),
+
+                                    itemBuilder: (context, index) {
+                                      if (index >= state.users.length) {
+                                        return LoadingIndicator();
+                                      }
+
+                                      final user = state.users[index];
+                                      return UserListTile(
+                                        user: user,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                UserDetailsScreen(user: user),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ),
                         ],
                       ),
                     ),
@@ -81,7 +109,7 @@ class _UserListScreenState extends State<UserListScreen> {
                     onRefresh: () async {
                       context.read<UserBloc>().add(GetUserEvent());
                     },
-                    child: errorWidget(state),
+                    child: ErrorWidget(state.msg),
                   );
                 } else {
                   return Center(child: Text("404 Invalid"));
@@ -112,8 +140,39 @@ class _UserListScreenState extends State<UserListScreen> {
                           Expanded(
                             child: Column(
                               children: [
-                                searchBar(context),
-                                userListViewBuilder(state),
+                                CustomSearchBar(
+                                  searchController: _searchController,
+                                ),
+                                Expanded(
+                                  child: state.users.isEmpty
+                                      ? Center(child: Text("No User Found!!"))
+                                      : ListView.builder(
+                                          controller: _controller,
+                                          itemCount:
+                                              state.users.length +
+                                              (state.isFetching ? 1 : 0),
+
+                                          itemBuilder: (context, index) {
+                                            if (index >= state.users.length) {
+                                              return LoadingIndicator();
+                                            }
+
+                                            final user = state.users[index];
+                                            return UserListTile(
+                                              user: user,
+                                              onTap: () => Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      UserDetailsScreen(
+                                                        user: user,
+                                                      ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                ),
                               ],
                             ),
                           ),
@@ -131,7 +190,7 @@ class _UserListScreenState extends State<UserListScreen> {
                     onRefresh: () async {
                       context.read<UserBloc>().add(GetUserEvent());
                     },
-                    child: errorWidget(state),
+                    child: ErrorWidget(state.msg),
                   );
                 } else {
                   return Center(child: Text("404 Invalid"));
@@ -140,138 +199,6 @@ class _UserListScreenState extends State<UserListScreen> {
             );
           }
         },
-      ),
-    );
-  }
-
-  LayoutBuilder errorWidget(UserError state) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Center(child: Text(state.msg)),
-          ),
-        );
-      },
-    );
-  }
-
-  Expanded userListViewBuilder(UserLoaded state) {
-    return Expanded(
-      child: state.users.isEmpty
-          ? Center(child: Text("No User Found!!"))
-          : ListView.builder(
-              controller: _controller,
-              itemCount: state.users.length + (state.isFetching ? 1 : 0),
-
-              itemBuilder: (context, index) {
-                if (index >= state.users.length) {
-                  return SizedBox(
-                    height: 50,
-                    width: 50,
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-
-                final user = state.users[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => UserDetailsScreen(user: user),
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.grey),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 8,
-
-                            offset: Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            clipBehavior: Clip.antiAlias,
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: CachedNetworkImage(imageUrl: user.imgUrl),
-                          ),
-                          SizedBox(width: 20),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [Text(user.firstName)],
-                          ),
-                          SizedBox(height: 5),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-    );
-  }
-
-  Form searchBar(BuildContext context) {
-    return Form(
-      key: formKey,
-      child: TextFormField(
-        onChanged: (value) {
-          if (!formKey.currentState!.validate()) {
-            return;
-          }
-          context.read<UserBloc>().add(
-            FilterUserEvent(query: _searchController.text),
-          );
-        },
-        onFieldSubmitted: (value) {
-          if (!formKey.currentState!.validate()) {
-            return;
-          }
-          context.read<UserBloc>().add(
-            FilterUserEvent(query: _searchController.text),
-          );
-        },
-        controller: _searchController,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return "The Input cannot be empty";
-          }
-          if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
-            return "Only alphabets are allowed";
-          }
-          return null;
-        },
-        decoration: InputDecoration(
-          hintText: "Search Names....",
-          suffixIcon: GestureDetector(
-            onTap: () {
-              if (!formKey.currentState!.validate()) {
-                return;
-              }
-            },
-            child: Icon(Icons.search),
-          ),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        ),
       ),
     );
   }
